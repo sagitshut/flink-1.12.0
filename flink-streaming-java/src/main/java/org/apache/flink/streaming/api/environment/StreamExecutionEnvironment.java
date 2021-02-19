@@ -1927,6 +1927,7 @@ public class StreamExecutionEnvironment {
 		checkNotNull(streamGraph, "StreamGraph cannot be null.");
 		checkNotNull(configuration.get(DeploymentOptions.TARGET), "No execution.target specified in your configuration file.");
 
+		//todo 根据不同的提交模式选择不同的Factory
 		final PipelineExecutorFactory executorFactory =
 			executorServiceLoader.getExecutorFactory(configuration);
 

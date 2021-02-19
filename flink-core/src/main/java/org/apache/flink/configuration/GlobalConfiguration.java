@@ -116,6 +116,7 @@ public final class GlobalConfiguration {
 		}
 
 		// get Flink yaml configuration file
+		// todo flink-conf.yaml文件
 		final File yamlConfigFile = new File(confDirFile, FLINK_CONF_FILENAME);
 
 		if (!yamlConfigFile.exists()) {
@@ -123,7 +124,7 @@ public final class GlobalConfiguration {
 				"The Flink config file '" + yamlConfigFile +
 					"' (" + confDirFile.getAbsolutePath() + ") does not exist.");
 		}
-
+		//todo 加载配置文件
 		Configuration configuration = loadYAMLResource(yamlConfigFile);
 
 		if (dynamicProperties != null) {
@@ -163,10 +164,12 @@ public final class GlobalConfiguration {
 			while ((line = reader.readLine()) != null) {
 				lineNo++;
 				// 1. check for comments
+				//todo 配置文件中注释
 				String[] comments = line.split("#", 2);
 				String conf = comments[0].trim();
 
 				// 2. get key and value
+				//todo 配置项
 				if (conf.length() > 0) {
 					String[] kv = conf.split(": ", 2);
 

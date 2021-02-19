@@ -313,6 +313,7 @@ public class PackagedProgram {
 		}
 
 		try {
+			//todo 通过反射调用main方法
 			mainMethod.invoke(null, (Object) args);
 		} catch (IllegalArgumentException e) {
 			throw new ProgramInvocationException("Could not invoke the main method, arguments are not matching.", e);

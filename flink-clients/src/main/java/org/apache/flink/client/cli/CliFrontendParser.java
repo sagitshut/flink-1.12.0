@@ -266,6 +266,7 @@ public class CliFrontendParser {
 	}
 
 	public static Options getRunCommandOptions() {
+		//todo GeneralOptions
 		Options options = buildGeneralOptions(new Options());
 		options = getProgramSpecificOptions(options);
 		options.addOption(SAVEPOINT_PATH_OPTION);

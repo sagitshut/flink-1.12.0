@@ -127,8 +127,11 @@ public class CliFrontend {
 			Configuration configuration,
 			ClusterClientServiceLoader clusterClientServiceLoader,
 			List<CustomCommandLine> customCommandLines) {
+		//todo 初始化了配置，就是 flink-conf.yaml 的属性
 		this.configuration = checkNotNull(configuration);
+		//todo 命令行参数
 		this.customCommandLines = checkNotNull(customCommandLines);
+		//todo  初始化了 clusterClientServiceLoader，使用 SPI 加载了 org.apache.flink.client.deployment.StandaloneClientFactory 类
 		this.clusterClientServiceLoader = checkNotNull(clusterClientServiceLoader);
 
 		FileSystem.initialize(configuration, PluginUtils.createPluginManagerFromRootFolder(configuration));
@@ -139,8 +142,9 @@ public class CliFrontend {
 			customCommandLine.addGeneralOptions(customCommandLineOptions);
 			customCommandLine.addRunOptions(customCommandLineOptions);
 		}
-
+		//todo 客户端超时时间
 		this.clientTimeout = configuration.get(ClientOptions.CLIENT_TIMEOUT);
+		//todo 并行度
 		this.defaultParallelism = configuration.getInteger(CoreOptions.DEFAULT_PARALLELISM);
 	}
 
@@ -214,7 +218,7 @@ public class CliFrontend {
 	 */
 	protected void run(String[] args) throws Exception {
 		LOG.info("Running 'run' command.");
-
+		//todo 执行选项
 		final Options commandOptions = CliFrontendParser.getRunCommandOptions();
 		final CommandLine commandLine = getCommandLine(commandOptions, args, true);
 
@@ -625,6 +629,7 @@ public class CliFrontend {
 	}
 
 	public CommandLine getCommandLine(final Options commandOptions, final String[] args, final boolean stopAtNonOptions) throws CliArgsException {
+		//todo 合并执行选项
 		final Options commandLineOptions = CliFrontendParser.mergeOptions(commandOptions, customCommandLineOptions);
 		return CliFrontendParser.parse(commandLineOptions, args, stopAtNonOptions);
 	}
@@ -952,6 +957,7 @@ public class CliFrontend {
 	public int parseAndRun(String[] args) {
 
 		// check for action
+		//todo 检查是否动作，没有动作就打印帮助
 		if (args.length < 1) {
 			CliFrontendParser.printHelp(customCommandLines);
 			System.out.println("Please specify an action.");
@@ -959,13 +965,16 @@ public class CliFrontend {
 		}
 
 		// get action
+		//todo 获取动作
 		String action = args[0];
 
 		// remove action from parameters
+		//TODO 从参数中删除动作
 		final String[] params = Arrays.copyOfRange(args, 1, args.length);
 
 		try {
 			// do action
+			//todo 不同的动作走不同的分支
 			switch (action) {
 				case ACTION_RUN:
 					run(params);
@@ -1027,12 +1036,24 @@ public class CliFrontend {
 		EnvironmentInformation.logEnvironmentInfo(LOG, "Command Line Client", args);
 
 		// 1. find the configuration directory
+		/**
+		 * 步骤一：
+		 * 获取配置目录
+		 */
 		final String configurationDirectory = getConfigurationDirectoryFromEnv();
 
 		// 2. load the global configuration
+		/**
+		 * 步骤二：
+		 *  读取配置文件中配置项
+		 */
 		final Configuration configuration = GlobalConfiguration.loadConfiguration(configurationDirectory);
 
 		// 3. load the custom command lines
+		/**
+		 * 步骤三：
+		 * 加载命令行
+		 */
 		final List<CustomCommandLine> customCommandLines = loadCustomCommandLines(
 			configuration,
 			configurationDirectory);
@@ -1041,7 +1062,10 @@ public class CliFrontend {
 			final CliFrontend cli = new CliFrontend(
 				configuration,
 				customCommandLines);
-
+			/**
+			 * 步骤四：
+			 * 执行
+			 */
 			SecurityUtils.install(new SecurityConfiguration(cli.configuration));
 			int retCode = SecurityUtils.getInstalledContext()
 					.runSecured(() -> cli.parseAndRun(args));
@@ -1100,12 +1124,14 @@ public class CliFrontend {
 
 	public static List<CustomCommandLine> loadCustomCommandLines(Configuration configuration, String configurationDirectory) {
 		List<CustomCommandLine> customCommandLines = new ArrayList<>();
+		//todo 加载GenericCLI
 		customCommandLines.add(new GenericCLI(configuration, configurationDirectory));
 
 		//	Command line interface of the YARN session, with a special initialization here
 		//	to prefix all options with y/yarn.
 		final String flinkYarnSessionCLI = "org.apache.flink.yarn.cli.FlinkYarnSessionCli";
 		try {
+			//todo 加载yarnSessionCLI
 			customCommandLines.add(
 				loadCustomCommandLine(flinkYarnSessionCLI,
 					configuration,
@@ -1125,6 +1151,7 @@ public class CliFrontend {
 
 		//	Tips: DefaultCLI must be added at last, because getActiveCustomCommandLine(..) will get the
 		//	      active CustomCommandLine in order and DefaultCLI isActive always return true.
+		//todo 最后加载DefaultCLI
 		customCommandLines.add(new DefaultCLI());
 
 		return customCommandLines;
@@ -1156,7 +1183,7 @@ public class CliFrontend {
 	 * @param params The constructor parameters
 	 */
 	private static CustomCommandLine loadCustomCommandLine(String className, Object... params) throws Exception {
-
+		//todo 通过反射加载 CustomCommandLine.class的子类
 		Class<? extends CustomCommandLine> customCliClass =
 			Class.forName(className).asSubclass(CustomCommandLine.class);
 
